@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>OSN SD Center | Login & Latihan Soal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
+      min-height: 100vh;
+    }
+
+    /* --- LAYOUT LOGIN & APP --- */
+    .app-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Login Panel (Modal Style) */
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 48px;
+      padding: 2rem 2rem 2.2rem;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 25px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-card h2 {
+      color: #1e3c72;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-card p {
+      color: #475569;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 12px 18px;
+      margin: 12px 0;
+      border-radius: 60px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .login-input:focus {
+      border-color: #1e3c72;
+      box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.2);
+    }
+
+    .login-btn {
+      background: #1e3c72;
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: 0.2s;
+    }
+
+    .login-btn:hover {
+      background: #0f2b4f;
+      transform: scale(0.98);
+    }
+
+    .error-msg {
+      color: #b91c1c;
+      background: #fee2e2;
+      border-radius: 40px;
+      padding: 6px;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    /* Main App (setelah login) */
+    .main-app {
+      display: none;
+    }
+
+    /* Header & Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      background: white;
+      padding: 0.8rem 1.8rem;
+      border-radius: 60px;
+      margin-bottom: 2rem;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+    }
+
+    .logo h2 {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-size: 1.5rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #f1f5f9;
+      padding: 6px 18px;
+      border-radius: 40px;
+    }
+
+    .user-info span {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      background: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-weight: bold;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button.primary {
+      background: #1e3c72;
+      color: white;
+    }
+
+    button.primary:hover {
+      background: #0f2b4f;
+      transform: translateY(-2px);
+    }
+
+    button.secondary {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .score-board {
+      background: #0f172ad9;
+      backdrop-filter: blur(8px);
+      padding: 0.6rem 1.2rem;
+      border-radius: 60px;
+      color: white;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .soal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 28px;
+      padding: 1.2rem;
+      box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+    }
+
+    .soal-nomor {
+      background: #1e3c72;
+      display: inline-block;
+      padding: 0.2rem 0.8rem;
+      border-radius: 30px;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-bottom: 0.7rem;
+    }
+
+    .soal-teks {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 60px;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+    }
+
+    .option:hover {
+      background: #eef2ff;
+    }
+
+    input[type="radio"] {
+      accent-color: #1e3c72;
+    }
+
+    .jawaban-status {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 8px;
+    }
+
+    .benar {
+      color: #0e7b32;
+      background: #e8f5e9;
+      padding: 2px 10px;
+      border-radius: 30px;
+    }
+
+    .salah {
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 2px 10px;
+      border-radius: 30px;
+    }
+
+    .essay-input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 28px;
+      border: 1px solid #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .check-essay-btn {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: #334155;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN PANEL -->
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <h2>🏆 OSN SD Center</h2>
+    <p>Masuk untuk mengakses 30 soal olimpiade</p>
+    <input type="text" id="loginUsername" class="login-input" placeholder="Nama Pengguna" autocomplete="off">
+    <input type="password" id="loginPassword" class="login-input" placeholder="Kata Sandi" autocomplete="off">
+    <button id="loginBtn" class="login-btn">Login & Mulai Belajar</button>
+    <div id="loginError" class="error-msg" style="display: none;">Username atau password salah! Coba: siswa / osnsd</div>
+    <div style="margin-top: 20px; font-size: 12px; color:#64748b;">🔐 Demo: username: <strong>siswa</strong> , password: <strong>osnsd</strong></div>
+  </div>
+</div>
+
+<!-- MAIN APPLICATION (setelah login) -->
+<div id="mainApp" class="main-app">
+  <div class="app-wrapper">
+    <div class="navbar">
+      <div class="logo"><h2>📚 OSN SD | Paket Lengkap</h2></div>
+      <div class="user-info">
+        <span>👋 Hallo, <span id="displayUsername"></span></span>
+        <button id="logoutNavBtn" class="logout-btn">Keluar</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="resetBtn" class="secondary">⟳ Reset Jawaban</button>
+      <button id="checkAllBtn" class="primary">✅ Periksa Semua</button>
+      <div class="score-board" id="scoreDisplay">🎯 Skor: 0 / 30</div>
+    </div>
+
+    <div id="soalContainer" class="soal-grid"></div>
+    <footer>✨ Soal OSN SD (Matematika & IPA) | Klik jawaban, untuk isian tekan "Cek Jawaban"</footer>
+  </div>
+</div>
+
+<script>
+  // --------------------------------------------------------------
+  // DATA SOAL (30 soal: 25 PG + 5 Isian)
+  // --------------------------------------------------------------
+  const soalData = [
+    { nomor: 1, type: "pg", teks: "Hasil dari 125 × 8 : 4 adalah …", options: ["250", "200", "300", "400"], jawaban: "250", userAnswer: null, correct: false },
+    { nomor: 2, type: "pg", teks: "Bilangan yang merupakan kelipatan 7 dan juga faktor dari 42 adalah …", options: ["14", "21", "7", "Semua benar"], jawaban: "Semua benar", userAnswer: null, correct: false },
+    { nomor: 3, type: "pg", teks: "FPB dari 36, 48, dan 60 adalah …", options: ["6", "12", "18", "24"], jawaban: "12", userAnswer: null, correct: false },
+    { nomor: 4, type: "pg", teks: "3/4 + 2/5 – 1/2 = …", options: ["13/20", "17/20", "9/20", "11/20"], jawaban: "13/20", userAnswer: null, correct: false },
+    { nomor: 5, type: "pg", teks: "Sebuah keran mengalirkan air 12 liter per menit. Volume air yang keluar dalam 2,5 jam adalah … liter.", options: ["1.200", "1.500", "1.800", "2.000"], jawaban: "1.800", userAnswer: null, correct: false },
+    { nomor: 6, type: "pg", teks: "Umur Ayah : umur Ibu = 5 : 4. Jika selisih umur mereka 8 tahun, umur Ayah adalah …", options: ["32 tahun", "36 tahun", "40 tahun", "44 tahun"], jawaban: "40 tahun", userAnswer: null, correct: false },
+    { nomor: 7, type: "pg", teks: "KPK dari 12, 18, dan 24 adalah …", options: ["48", "56", "64", "72"], jawaban: "72", userAnswer: null, correct: false },
+    { nomor: 8, type: "pg", teks: "Hasil dari 25² – 15² adalah …", options: ["400", "350", "300", "250"], jawaban: "400", userAnswer: null, correct: false },
+    { nomor: 9, type: "pg", teks: "Bentuk desimal dari 7/20 adalah …", options: ["0,25", "0,30", "0,35", "0,40"], jawaban: "0,35", userAnswer: null, correct: false },
+    { nomor: 10, type: "pg", teks: "Sebuah taman berbentuk lingkaran dengan diameter 28 m. Luas taman adalah … (π=22/7)", options: ["616 m²", "528 m²", "308 m²", "246 m²"], jawaban: "616 m²", userAnswer: null, correct: false },
+    { nomor: 11, type: "pg", teks: "Suatu barang dibeli seharga Rp150.000,00 lalu dijual dengan untung 20%. Harga jualnya adalah …", options: ["Rp170.000", "Rp175.000", "Rp180.000", "Rp190.000"], jawaban: "Rp180.000", userAnswer: null, correct: false },
+    { nomor: 12, type: "pg", teks: "Rata-rata nilai ulangan 5 siswa adalah 80. Setelah satu siswa mengikuti susulan, rata-rata menjadi 82. Nilai siswa susulan adalah …", options: ["92", "90", "88", "85"], jawaban: "92", userAnswer: null, correct: false },
+    { nomor: 13, type: "pg", teks: "0,75 : 0,25 × 2 = …", options: ["4", "5", "6", "7"], jawaban: "6", userAnswer: null, correct: false },
+    { nomor: 14, type: "pg", teks: "Jumlah 20 bilangan genap pertama adalah …", options: ["380", "400", "420", "440"], jawaban: "420", userAnswer: null, correct: false },
+    { nomor: 15, type: "pg", teks: "Hewan yang bernapas menggunakan kulit adalah …", options: ["Ikan", "Katak (saat masih berudu)", "Cacing tanah", "Ular"], jawaban: "Cacing tanah", userAnswer: null, correct: false },
+    { nomor: 16, type: "pg", teks: "Proses perubahan wujud dari padat menjadi gas disebut …", options: ["Menguap", "Menyublim", "Mengembun", "Membeku"], jawaban: "Menyublim", userAnswer: null, correct: false },
+    { nomor: 17, type: "pg", teks: "Sumber energi utama bagi tubuh manusia adalah …", options: ["Protein", "Lemak", "Karbohidrat", "Vitamin"], jawaban: "Karbohidrat", userAnswer: null, correct: false },
+    { nomor: 18, type: "pg", teks: "Planet terbesar dalam tata surya kita adalah …", options: ["Saturnus", "Jupiter", "Uranus", "Neptunus"], jawaban: "Jupiter", userAnswer: null, correct: false },
+    { nomor: 19, type: "pg", teks: "Bagian tumbuhan yang berfungsi sebagai alat perkembangbiakan generatif adalah …", options: ["Akar", "Batang", "Daun", "Bunga"], jawaban: "Bunga", userAnswer: null, correct: false },
+    { nomor: 20, type: "pg", teks: "Gaya yang memperlambat gerakan benda di udara disebut …", options: ["Gaya gravitasi", "Gaya gesek", "Gaya pegas", "Gaya listrik"], jawaban: "Gaya gesek", userAnswer: null, correct: false },
+    { nomor: 21, type: "pg", teks: "Alat optik yang digunakan untuk melihat benda sangat kecil adalah …", options: ["Lup", "Mikroskop", "Teleskop", "Periskop"], jawaban: "Mikroskop", userAnswer: null, correct: false },
+    { nomor: 22, type: "pg", teks: "Contoh hewan yang mengalami metamorfosis sempurna adalah …", options: ["Belalang", "Kecoa", "Jangkrik", "Kupu-kupu"], jawaban: "Kupu-kupu", userAnswer: null, correct: false },
+    { nomor: 23, type: "pg", teks: "Penyakit yang disebabkan oleh kekurangan vitamin C adalah …", options: ["Beri-beri", "Skorbut", "Rakitis", "Anemia"], jawaban: "Skorbut", userAnswer: null, correct: false },
+    { nomor: 24, type: "pg", teks: "Planet yang dikenal memiliki cincin paling indah adalah …", options: ["Jupiter", "Mars", "Saturnus", "Venus"], jawaban: "Saturnus", userAnswer: null, correct: false },
+    { nomor: 25, type: "pg", teks: "Perbandingan luas dan keliling persegi panjang (p=24cm, l=18cm) dalam bentuk sederhana adalah …", options: ["12:7", "4:3", "6:5", "3:2"], jawaban: "12:7", userAnswer: null, correct: false },
+    // ISIAN (26-30)
+    { nomor: 26, type: "essay", teks: "Kakek memiliki 60 ekor ayam. 1/3 dari ayam betina dan 1/4 dari ayam jantan adalah ayam putih. Jika jumlah ayam putih 18 ekor, berapa jumlah ayam betina? (jawaban angka)", jawaban: "36", userAnswer: null, correct: false },
+    { nomor: 27, type: "essay", teks: "Sebuah bak mandi berbentuk kubus dengan panjang rusuk 80 cm. Jika sudah terisi 3/4 bagian, berapa liter air yang harus ditambahkan agar bak penuh? (angka liter)", jawaban: "128", userAnswer: null, correct: false },
+    { nomor: 28, type: "essay", teks: "Seekor siput berada di dasar sumur kering sedalam 8 meter. Setiap hari naik 3 meter, turun 2 meter malam. Berapa hari siput keluar?", jawaban: "6", userAnswer: null, correct: false },
+    { nomor: 29, type: "essay", teks: "Kandang 50 ekor (ayam+kambing). Jumlah kaki 130. Berapa banyak kambing?", jawaban: "15", userAnswer: null, correct: false },
+    { nomor: 30, type: "essay", teks: "Jarak 1,2 km, kecepatan 60 m/menit, berangkat 06.30. Pukul berapa sampai? (format HH.MM ex: 06.50)", jawaban: "06.50", userAnswer: null, correct: false }
+  ];
+
+  let soal = JSON.parse(JSON.stringify(soalData));
+  let currentUser = null;
+
+  // ----- helper: update skor -----
+  function updateScoreUI() {
+    let benarCount = soal.filter(s => s.correct === true).length;
+    const scoreSpan = document.getElementById("scoreDisplay");
+    if (scoreSpan) scoreSpan.innerHTML = `🎯 Skor: ${benarCount} / 30`;
+  }
+
+  // Simpan jawaban (PG / Essay)
+  function saveAnswer(nomor, answer, isEssay = false) {
+    const item = soal.find(s => s.nomor === nomor);
+    if (!item) return;
+    if (isEssay) {
+      item.userAnswer = answer;
+      let rawAnswer = answer.toString().trim();
+      let correctAns = item.jawaban.toString().trim();
+      let isCorrect = false;
+      if (nomor === 30) {
+        let normalized = rawAnswer.replace(/\./g, ':').replace(/ /g, '');
+        let normKey = correctAns.replace(/\./g, ':');
+        isCorrect = (normalized === normKey) || (normalized === "6:50") || (normalized === "06:50");
+      } else if (nomor === 26 || nomor === 27 || nomor === 28 || nomor === 29) {
+        isCorrect = (Number(rawAnswer) === Number(correctAns));
+      } else {
+        isCorrect = (rawAnswer.toLowerCase() === correctAns.toLowerCase());
+      }
+      item.correct = isCorrect;
+    } else {
+      item.userAnswer = answer;
+      item.correct = (answer === item.jawaban);
+    }
+    updateScoreUI();
+    renderSoalList();
+  }
+
+  function resetAllAnswers() {
+    for (let s of soal) {
+      s.userAnswer = null;
+      s.correct = false;
+    }
+    renderSoalList();
+    updateScoreUI();
+  }
+
+  function checkAllFromDOM() {
+    // ambil semua nilai input essay
+    const essayInputs = document.querySelectorAll('.essay-input');
+    essayInputs.forEach(inp => {
+      const nomor = parseInt(inp.getAttribute('data-nomor'));
+      const value = inp.value;
+      if (!isNaN(nomor)) {
+        const soalItem = soal.find(s => s.nomor === nomor);
+        if (soalItem) {
+          let raw = value.toString().trim();
+          let isCorr = false;
+          if (nomor === 30) {
+            let norm = raw.replace(/\./g, ':').replace(/ /g, '');
+            let kunci = soalItem.jawaban.replace(/\./g, ':');
+            isCorr = (norm === kunci) || (norm === "6:50");
+          } else if ([26,27,28,29].includes(nomor)) {
+            isCorr = (Number(raw) === Number(soalItem.jawaban));
+          } else {
+            isCorr = (raw.toLowerCase() === soalItem.jawaban.toLowerCase());
+          }
+          soalItem.userAnswer = value;
+          soalItem.correct = isCorr;
+        }
+      }
+    });
+    // radio buttons
+    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
+    checkedRadios.forEach(radio => {
+      const nomor = parseInt(radio.getAttribute('data-nomor'));
+      const val = radio.value;
+      const soalItem = soal.find(s => s.nomor === nomor);
+      if (soalItem) {
+        soalItem.userAnswer = val;
+        soalItem.correct = (val === soalItem.jawaban);
+      }
+    });
+    renderSoalList();
+    updateScoreUI();
+  }
+
+  function renderSoalList() {
+    const container = document.getElementById("soalContainer");
+    if (!container) return;
+    container.innerHTML = "";
+    for (let s of soal) {
+      const card = document.createElement("div");
+      card.className = "card";
+      const nomorSpan = document.createElement("div");
+      nomorSpan.className = "soal-nomor";
+      nomorSpan.innerText = `Soal ${s.nomor}  |  ${s.type === "pg" ? "PG" : "Isian"}`;
+      const teksDiv = document.createElement("div");
+      teksDiv.className = "soal-teks";
+      teksDiv.innerText = s.teks;
+      card.appendChild(nomorSpan);
+      card.appendChild(teksDiv);
+
+      if (s.type === "pg") {
+        const optDiv = document.createElement("div");
+        optDiv.className = "options";
+        s.options.forEach(opt => {
+          const label = document.createElement("label");
+          label.className = "option";
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = `q${s.nomor}`;
+          radio.value = opt;
+          radio.setAttribute("data-nomor", s.nomor);
+          if (s.userAnswer === opt) radio.checked = true;
+          radio.addEventListener("change", () => saveAnswer(s.nomor, opt, false));
+          const span = document.createElement("span");
+          span.innerText = opt;
+          label.appendChild(radio);
+          label.appendChild(span);
+          optDiv.appendChild(label);
+        });
+        card.appendChild(optDiv);
+        const statusDiv = document.createElement("div");
+        statusDiv.className = "jawaban-status";
+        if (s.userAnswer) {
+          statusDiv.innerHTML = `<span class="${s.correct ? 'benar' : 'salah'}">${s.correct ? '✓ Benar' : '✗ Salah'}</span>
+                                 <span>🔑 ${s.jawaban}</span>`;
+        } else {
+          statusDiv.innerHTML = `<span class="neutral">⚡ Belum dijawab</span>`;
+        }
+        card.appendChild(statusDiv);
+      } 
+      else {
+        const area = document.createElement("div");
+        const inputBox = document.createElement("input");
+        inputBox.type = "text";
+        inputBox.placeholder = "Ketik jawaban angka / teks ...";
+        inputBox.className = "essay-input";
+        inputBox.setAttribute("data-nomor", s.nomor);
+        if (s.userAnswer) inputBox.value = s.userAnswer;
+        const cekBtn = document.createElement("button");
+        cekBtn.innerText = "Cek Jawaban";
+        cekBtn.className = "check-essay-btn";
+        cekBtn.onclick = () => {
+          saveAnswer(s.nomor, inputBox.value, true);
+        };
+        area.appendChild(inputBox);
+        area.appendChild(cekBtn);
+        card.appendChild(area);
+        const statusDiv = document.createElement("div");
+        statusDiv.className = "jawaban-status";
+        if (s.userAnswer && s.userAnswer !== "") {
+          statusDiv.innerHTML = `<span class="${s.correct ? 'benar' : 'salah'}">${s.correct ? '✓ Benar' : '✗ Salah'}</span>
+                                 <span>Kunci: ${s.jawaban}</span>`;
+        } else {
+          statusDiv.innerHTML = `<span class="neutral">📝 Belum dijawab (klik Cek)</span>`;
+        }
+        card.appendChild(statusDiv);
+      }
+      container.appendChild(card);
+    }
+  }
+
+  // ---------- LOGIN LOGIC ----------
+  function doLogin() {
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+    const errorDiv = document.getElementById("loginError");
+    // Demo credentials: username: siswa , password: osnsd
+    if (username === "siswa" && password === "osnsd") {
+      currentUser = username;
+      localStorage.setItem("osn_user", currentUser);
+      // sembunyikan login, tampilkan app
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      document.getElementById("displayUsername").innerText = currentUser;
+      // reset state soal (opsional, fresh state)
+      soal = JSON.parse(JSON.stringify(soalData));
+      renderSoalList();
+      updateScoreUI();
+    } else {
+      errorDiv.style.display = "block";
+      setTimeout(() => { errorDiv.style.display = "none"; }, 2000);
+    }
+  }
+
+  function logout() {
+    currentUser = null;
+    localStorage.removeItem("osn_user");
+    document.getElementById("loginOverlay").style.display = "flex";
+    document.getElementById("mainApp").style.display = "none";
+    // reset data soal biar bersih saat login ulang
+    soal = JSON.parse(JSON.stringify(soalData));
+  }
+
+  function checkAutoLogin() {
+    const savedUser = localStorage.getItem("osn_user");
+    if (savedUser === "siswa") {
+      currentUser = savedUser;
+      document.getElementById("loginOverlay").style.display = "none";
+      document.getElementById("mainApp").style.display = "block";
+      document.getElementById("displayUsername").innerText = currentUser;
+      soal = JSON.parse(JSON.stringify(soalData));
+      renderSoalList();
+      updateScoreUI();
+    } else {
+      document.getElementById("loginOverlay").style.display = "flex";
+      document.getElementById("mainApp").style.display = "none";
+    }
+  }
+
+  // Event listeners
+  document.getElementById("loginBtn")?.addEventListener("click", doLogin);
+  document.getElementById("logoutNavBtn")?.addEventListener("click", logout);
+  document.getElementById("resetBtn")?.addEventListener("click", resetAllAnswers);
+  document.getElementById("checkAllBtn")?.addEventListener("click", checkAllFromDOM);
+
+  // inisialisasi
+  checkAutoLogin();
+</script>
+</body>
+</html>
